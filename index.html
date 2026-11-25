@@ -335,6 +335,23 @@
       border-color: transparent;
     }
 
+    .mini-btn.save {
+      background: var(--brand);
+      color: var(--brand-text);
+      border-color: transparent;
+    }
+
+    .phone-edit-input {
+      width: 132px;
+      padding: 0.25rem 0.45rem;
+      border-radius: 6px;
+      border: 1px solid var(--brand);
+      background: var(--surface);
+      color: var(--text);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.85rem;
+    }
+
     .note-tag {
       display: inline-block;
       padding: 0.18rem 0.5rem;
@@ -656,19 +673,32 @@
 
   <script src="data.js"></script>
   <script>
+    const STORAGE_KEY = "voter_phone_overrides_v1";
+    function loadPhoneOverrides() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+      } catch {
+        return {};
+      }
+    }
+    const phoneOverrides = loadPhoneOverrides();
+
     const batches = window.VOTER_DATA || [];
     const allRows = batches.flatMap(b =>
-      b.rows.map(r => ({
-        key: `${b.batch}|${r[0]}|${r[2]}`,
-        batch: b.batch,
-        session: b.session,
-        serial: r[0],
-        name: r[1],
-        roll: r[2],
-        reg: r[3],
-        phone: r[4],
-        note: r[5],
-      }))
+      b.rows.map(r => {
+        const key = `${b.batch}|${r[0]}|${r[2]}`;
+        return {
+          key,
+          batch: b.batch,
+          session: b.session,
+          serial: r[0],
+          name: r[1],
+          roll: r[2],
+          reg: r[3],
+          phone: Object.hasOwn(phoneOverrides, key) ? phoneOverrides[key] : r[4],
+          note: r[5],
+        };
+      })
     );
 
     const selectedKeys = new Set();
@@ -693,10 +723,13 @@
     const printSheet = document.getElementById("printSheet");
     const toast = document.getElementById("toast");
 
-    statTotal.textContent = allRows.length;
-    const withPhoneCount = allRows.filter(r => r.phone.length >= 10).length;
-    statWithPhone.textContent = withPhoneCount;
-    statNoPhone.textContent = allRows.length - withPhoneCount;
+    function updateStats() {
+      statTotal.textContent = allRows.length;
+      const withPhoneCount = allRows.filter(r => r.phone.length >= 10).length;
+      statWithPhone.textContent = withPhoneCount;
+      statNoPhone.textContent = allRows.length - withPhoneCount;
+    }
+    updateStats();
 
     function showToast(msg) {
       toast.textContent = msg;
@@ -748,6 +781,116 @@
       const td = document.createElement("td");
       td.textContent = text;
       return td;
+    }
+
+    function savePhoneEdit(r, newValue) {
+      const cleaned = newValue.trim();
+      r.phone = cleaned;
+      phoneOverrides[r.key] = cleaned;
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(phoneOverrides));
+      } catch {
+        // Ignore storage quota errors
+      }
+      updateStats();
+      showToast(cleaned ? `নম্বর সেভ হয়েছে: ${cleaned}` : "নম্বর মুছে ফেলা হয়েছে");
+    }
+
+    function renderPhoneCell(phoneTd, r, editing = false) {
+      phoneTd.innerHTML = "";
+      const wrap = document.createElement("div");
+      wrap.className = "phone-cell";
+
+      if (editing) {
+        const input = document.createElement("input");
+        input.type = "tel";
+        input.className = "phone-edit-input";
+        input.value = r.phone;
+        input.placeholder = "01XXXXXXXXX";
+        input.setAttribute("aria-label", `${r.name} এর মোবাইল নম্বর`);
+
+        const saveBtn = document.createElement("button");
+        saveBtn.type = "button";
+        saveBtn.className = "mini-btn save";
+        saveBtn.textContent = "সেভ";
+
+        const cancelBtn = document.createElement("button");
+        cancelBtn.type = "button";
+        cancelBtn.className = "mini-btn";
+        cancelBtn.textContent = "বাতিল";
+
+        const commit = () => {
+          savePhoneEdit(r, input.value);
+          renderPhoneCell(phoneTd, r, false);
+        };
+
+        saveBtn.addEventListener("click", commit);
+        cancelBtn.addEventListener("click", () => renderPhoneCell(phoneTd, r, false));
+        input.addEventListener("keydown", e => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            commit();
+          } else if (e.key === "Escape") {
+            renderPhoneCell(phoneTd, r, false);
+          }
+        });
+
+        wrap.append(input, saveBtn, cancelBtn);
+        phoneTd.appendChild(wrap);
+        input.focus();
+        input.select();
+        return;
+      }
+
+      if (r.phone) {
+        const numSpan = document.createElement("span");
+        numSpan.className = "phone-num";
+        numSpan.textContent = r.phone;
+        wrap.appendChild(numSpan);
+
+        const copyBtn = document.createElement("button");
+        copyBtn.type = "button";
+        copyBtn.className = "mini-btn";
+        copyBtn.textContent = "কপি";
+        copyBtn.addEventListener("click", async () => {
+          try {
+            await navigator.clipboard.writeText(r.phone);
+            showToast(`কপি হয়েছে: ${r.phone}`);
+          } catch {
+            showToast(r.phone);
+          }
+        });
+        wrap.appendChild(copyBtn);
+
+        if (r.phone.length >= 10) {
+          const callLink = document.createElement("a");
+          callLink.className = "mini-btn";
+          callLink.href = `tel:${r.phone}`;
+          callLink.textContent = "কল";
+          wrap.appendChild(callLink);
+
+          const waLink = document.createElement("a");
+          waLink.className = "mini-btn wa";
+          waLink.href = `https://wa.me/88${r.phone}`;
+          waLink.target = "_blank";
+          waLink.rel = "noopener";
+          waLink.textContent = "WA";
+          wrap.appendChild(waLink);
+        }
+      } else {
+        const emptySpan = document.createElement("span");
+        emptySpan.textContent = "—";
+        wrap.appendChild(emptySpan);
+      }
+
+      const editBtn = document.createElement("button");
+      editBtn.type = "button";
+      editBtn.className = "mini-btn";
+      editBtn.textContent = "ইডিট";
+      editBtn.addEventListener("click", () => renderPhoneCell(phoneTd, r, true));
+      wrap.appendChild(editBtn);
+
+      phoneTd.appendChild(wrap);
     }
 
     function updateSelectionBar(visibleRows) {
@@ -816,49 +959,7 @@
         tr.appendChild(createCell(r.reg));
 
         const phoneTd = document.createElement("td");
-        if (r.phone) {
-          const wrap = document.createElement("div");
-          wrap.className = "phone-cell";
-
-          const numSpan = document.createElement("span");
-          numSpan.className = "phone-num";
-          numSpan.textContent = r.phone;
-          wrap.appendChild(numSpan);
-
-          const copyBtn = document.createElement("button");
-          copyBtn.type = "button";
-          copyBtn.className = "mini-btn";
-          copyBtn.textContent = "কপি";
-          copyBtn.addEventListener("click", async () => {
-            try {
-              await navigator.clipboard.writeText(r.phone);
-              showToast(`কপি হয়েছে: ${r.phone}`);
-            } catch {
-              showToast(r.phone);
-            }
-          });
-          wrap.appendChild(copyBtn);
-
-          if (r.phone.length >= 10) {
-            const callLink = document.createElement("a");
-            callLink.className = "mini-btn";
-            callLink.href = `tel:${r.phone}`;
-            callLink.textContent = "কল";
-            wrap.appendChild(callLink);
-
-            const waLink = document.createElement("a");
-            waLink.className = "mini-btn wa";
-            waLink.href = `https://wa.me/88${r.phone}`;
-            waLink.target = "_blank";
-            waLink.rel = "noopener";
-            waLink.textContent = "WA";
-            wrap.appendChild(waLink);
-          }
-
-          phoneTd.appendChild(wrap);
-        } else {
-          phoneTd.textContent = "—";
-        }
+        renderPhoneCell(phoneTd, r);
         tr.appendChild(phoneTd);
 
         const noteTd = document.createElement("td");
