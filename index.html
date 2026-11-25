@@ -585,6 +585,7 @@
       </div>
       <div class="hero-actions">
         <a class="btn primary" href="https://docs.google.com/spreadsheets/d/1AENJ6IvjMLlTwNa4avLIS0lI4YhBG6-2LkMdAB8Yn0Q/edit" target="_blank" rel="noopener">গুগল শীট খুলুন</a>
+        <button type="button" class="btn" id="syncSettingsBtn">সিঙ্ক সেটিংস</button>
         <button type="button" class="btn" id="exportCsvBtn">CSV ডাউনলোড</button>
       </div>
     </header>
@@ -669,11 +670,35 @@
 
   <section id="printSheet" aria-hidden="true"></section>
 
+  <dialog id="syncDialog" aria-labelledby="syncDialogTitle" style="max-width:460px;width:92%;border:1px solid var(--border);border-radius:14px;background:var(--surface);color:var(--text);padding:1.25rem;">
+    <h3 id="syncDialogTitle" style="margin:0 0 0.5rem;">লাইভ গুগল শীট সিঙ্ক</h3>
+    <p style="margin:0 0 0.75rem;color:var(--muted);font-size:0.9rem;">
+      Google Apps Script Web App URL বসালে যেকোনো ডিভাইস থেকে নম্বর ইডিট করলে গুগল শীট ও সব জায়গায় সাথে সাথে আপডেট হবে।
+    </p>
+    <input type="url" id="syncUrlInput" class="search-input" style="width:100%;margin-bottom:0.85rem;" placeholder="https://script.google.com/macros/s/.../exec" />
+    <div style="display:flex;gap:0.5rem;justify-content:flex-end;">
+      <button type="button" class="btn" id="closeSyncBtn">বন্ধ করুন</button>
+      <button type="button" class="btn primary" id="saveSyncBtn">সংরক্ষণ ও সিঙ্ক করুন</button>
+    </div>
+  </dialog>
+
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script src="data.js"></script>
   <script>
     const STORAGE_KEY = "voter_phone_overrides_v1";
+    const SYNC_URL_KEY = "voter_sync_url_v1";
+    const DEFAULT_SYNC_URL = "";
+
+    function getSyncUrl() {
+      if (DEFAULT_SYNC_URL) return DEFAULT_SYNC_URL;
+      try {
+        return localStorage.getItem(SYNC_URL_KEY) || "";
+      } catch {
+        return "";
+      }
+    }
+
     function loadPhoneOverrides() {
       try {
         return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
@@ -783,7 +808,7 @@
       return td;
     }
 
-    function savePhoneEdit(r, newValue) {
+    async function savePhoneEdit(r, newValue) {
       const cleaned = newValue.trim();
       r.phone = cleaned;
       phoneOverrides[r.key] = cleaned;
@@ -793,7 +818,33 @@
         // Ignore storage quota errors
       }
       updateStats();
-      showToast(cleaned ? `নম্বর সেভ হয়েছে: ${cleaned}` : "নম্বর মুছে ফেলা হয়েছে");
+
+      const syncUrl = getSyncUrl();
+      if (syncUrl) {
+        showToast("গুগল শীটে সেভ হচ্ছে...");
+        try {
+          const res = await fetch(syncUrl, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({
+              batch: r.batch,
+              serial: r.serial,
+              roll: r.roll,
+              phone: cleaned,
+            }),
+          });
+          const data = await res.json();
+          if (data && data.ok) {
+            showToast(cleaned ? `সব জায়গায় সেভ হয়েছে: ${cleaned}` : "সব জায়গা থেকে নম্বর মুছে ফেলা হয়েছে");
+            return;
+          }
+        } catch {
+          showToast("লোকালি সেভ হয়েছে, কিন্তু গুগল শীট সিঙ্ক ব্যর্থ হয়েছে");
+          return;
+        }
+      }
+
+      showToast(cleaned ? `লোকালি সেভ হয়েছে: ${cleaned}` : "নম্বর মুছে ফেলা হয়েছে");
     }
 
     function renderPhoneCell(phoneTd, r, editing = false) {
@@ -1104,8 +1155,56 @@
       showToast("CSV ডাউনলোড শুরু হয়েছে");
     });
 
+    async function syncFromSheet() {
+      const syncUrl = getSyncUrl();
+      const syncBtn = document.getElementById("syncSettingsBtn");
+      if (!syncUrl) {
+        syncBtn.textContent = "সিঙ্ক সেটিংস";
+        return;
+      }
+      syncBtn.textContent = "সিঙ্ক চালু ✓";
+      try {
+        const res = await fetch(syncUrl);
+        const data = await res.json();
+        if (data && data.ok && data.phones) {
+          for (const row of allRows) {
+            if (Object.hasOwn(data.phones, row.key)) {
+              row.phone = data.phones[row.key];
+              phoneOverrides[row.key] = row.phone;
+            }
+          }
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(phoneOverrides));
+          } catch {}
+          updateStats();
+          renderTable();
+        }
+      } catch {
+        // Fallback to cached data
+      }
+    }
+
+    const syncDialog = document.getElementById("syncDialog");
+    const syncUrlInput = document.getElementById("syncUrlInput");
+    document.getElementById("syncSettingsBtn").addEventListener("click", () => {
+      syncUrlInput.value = getSyncUrl();
+      syncDialog.showModal();
+    });
+    document.getElementById("closeSyncBtn").addEventListener("click", () => syncDialog.close());
+    document.getElementById("saveSyncBtn").addEventListener("click", async () => {
+      const val = syncUrlInput.value.trim();
+      try {
+        if (val) localStorage.setItem(SYNC_URL_KEY, val);
+        else localStorage.removeItem(SYNC_URL_KEY);
+      } catch {}
+      syncDialog.close();
+      await syncFromSheet();
+      showToast(val ? "লাইভ সিঙ্ক চালু হয়েছে" : "সিঙ্ক বন্ধ করা হয়েছে");
+    });
+
     renderBatchTabs();
     renderTable();
+    syncFromSheet();
   </script>
 </body>
 </html>
