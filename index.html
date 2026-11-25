@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="light dark" />
+  <title>নাট্য সংসদ নির্বাচন ২০২৬ — চূড়ান্ত ভোটার তালিকা</title>
+  <style>
+    :root {
+      --bg-light: #f4f6fb;
+      --bg-dark: #0f141c;
+      --surface-light: #ffffff;
+      --surface-dark: #18202c;
+      --surface-alt-light: #f8fafd;
+      --surface-alt-dark: #1f2937;
+      --text-light: #111827;
+      --text-dark: #f3f4f6;
+      --muted-light: #4b5563;
+      --muted-dark: #9ca3af;
+      --border-light: #e5e7eb;
+      --border-dark: #2d3748;
+      --brand-light: #1a73e8;
+      --brand-dark: #60a5fa;
+      --brand-text-light: #ffffff;
+      --brand-text-dark: #0b1120;
+      --ok-bg-light: #dcfce7;
+      --ok-bg-dark: #14532d;
+      --ok-text-light: #166534;
+      --ok-text-dark: #bbf7d0;
+      --warn-bg-light: #fef3c7;
+      --warn-bg-dark: #78350f;
+      --warn-text-light: #92400e;
+      --warn-text-dark: #fde68a;
+
+      --bg: var(--bg-light);
+      --surface: var(--surface-light);
+      --surface-alt: var(--surface-alt-light);
+      --text: var(--text-light);
+      --muted: var(--muted-light);
+      --border: var(--border-light);
+      --brand: var(--brand-light);
+      --brand-text: var(--brand-text-light);
+      --ok-bg: var(--ok-bg-light);
+      --ok-text: var(--ok-text-light);
+      --warn-bg: var(--warn-bg-light);
+      --warn-text: var(--warn-text-light);
+
+      color-scheme: light dark;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: var(--bg-dark);
+        --surface: var(--surface-dark);
+        --surface-alt: var(--surface-alt-dark);
+        --text: var(--text-dark);
+        --muted: var(--muted-dark);
+        --border: var(--border-dark);
+        --brand: var(--brand-dark);
+        --brand-text: var(--brand-text-dark);
+        --ok-bg: var(--ok-bg-dark);
+        --ok-text: var(--ok-text-dark);
+        --warn-bg: var(--warn-bg-dark);
+        --warn-text: var(--warn-text-dark);
+      }
+    }
+
+    @supports (color: light-dark(white, black)) {
+      :root {
+        --bg: light-dark(var(--bg-light), var(--bg-dark));
+        --surface: light-dark(var(--surface-light), var(--surface-dark));
+        --surface-alt: light-dark(var(--surface-alt-light), var(--surface-alt-dark));
+        --text: light-dark(var(--text-light), var(--text-dark));
+        --muted: light-dark(var(--muted-light), var(--muted-dark));
+        --border: light-dark(var(--border-light), var(--border-dark));
+        --brand: light-dark(var(--brand-light), var(--brand-dark));
+        --brand-text: light-dark(var(--brand-text-light), var(--brand-text-dark));
+        --ok-bg: light-dark(var(--ok-bg-light), var(--ok-bg-dark));
+        --ok-text: light-dark(var(--ok-text-light), var(--ok-text-dark));
+        --warn-bg: light-dark(var(--warn-bg-light), var(--warn-bg-dark));
+        --warn-text: light-dark(var(--warn-text-light), var(--warn-text-dark));
+        accent-color: var(--brand);
+      }
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Noto Sans Bengali", "Hind Siliguri", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 1.25rem 1rem 2.5rem;
+    }
+
+    header.hero {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .hero h1 {
+      margin: 0 0 0.25rem;
+      font-size: clamp(1.25rem, 2.5vw, 1.65rem);
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.55rem 0.95rem;
+      border-radius: 9px;
+      border: 1px solid var(--border);
+      background: var(--surface-alt);
+      color: var(--text);
+      font: inherit;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .btn.primary {
+      background: var(--brand);
+      color: var(--brand-text);
+      border-color: transparent;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.85rem 1rem;
+    }
+
+    .stat-label {
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .stat-value {
+      font-size: 1.45rem;
+      font-weight: 700;
+      margin-top: 0.15rem;
+    }
+
+    .controls {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+
+    .search-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .search-input {
+      flex: 1 1 280px;
+      padding: 0.65rem 0.9rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface-alt);
+      color: var(--text);
+      font: inherit;
+      font-size: 0.95rem;
+    }
+
+    .filter-pills, .batch-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+    }
+
+    .pill {
+      padding: 0.4rem 0.75rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface-alt);
+      color: var(--text);
+      font: inherit;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    .pill[aria-pressed="true"] {
+      background: var(--brand);
+      color: var(--brand-text);
+      border-color: transparent;
+      font-weight: 600;
+    }
+
+    .table-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .table-wrapper {
+      overflow: auto;
+      max-inline-size: 100%;
+      max-block-size: min(640px, 72vh);
+      container-type: inline-size;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 0.92rem;
+      --label-1: "ব্যাচ";
+      --label-2: "ক্রমিক";
+      --label-3: "ছাত্র-ছাত্রীর নাম";
+      --label-4: "রোল / শ্রেণি ক্রমিক";
+      --label-5: "রেজিস্ট্রেশন নম্বর";
+      --label-6: "মোবাইল নম্বর";
+      --label-7: "অতিরিক্ত নোট";
+    }
+
+    caption {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+    }
+
+    thead {
+      position: sticky;
+      inset-block-start: 0;
+      z-index: 2;
+    }
+
+    th, td {
+      padding: 0.65rem 0.8rem;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    thead th {
+      background: var(--brand);
+      color: var(--brand-text);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    tbody th {
+      font-weight: 600;
+      background: var(--surface);
+    }
+
+    tbody tr:nth-child(even) td,
+    tbody tr:nth-child(even) th {
+      background: var(--surface-alt);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    .phone-cell {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+
+    .phone-num {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-weight: 600;
+    }
+
+    .mini-btn {
+      padding: 0.2rem 0.48rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 0.76rem;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .mini-btn.wa {
+      background: var(--ok-bg);
+      color: var(--ok-text);
+      border-color: transparent;
+    }
+
+    .note-tag {
+      display: inline-block;
+      padding: 0.18rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      background: var(--warn-bg);
+      color: var(--warn-text);
+    }
+
+    .empty-state {
+      padding: 2.5rem 1rem;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 1.25rem;
+      right: 1.25rem;
+      background: var(--brand);
+      color: var(--brand-text);
+      padding: 0.6rem 1rem;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      z-index: 20;
+    }
+
+    .toast.show { opacity: 1; }
+
+    @container (width < 680px) {
+      .table-wrapper {
+        max-block-size: none;
+        padding: 0.75rem;
+      }
+
+      table, thead, tbody, tr, th, td {
+        display: block;
+      }
+
+      thead {
+        display: none;
+      }
+
+      tr {
+        margin-block-end: 0.85rem;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        overflow: hidden;
+        background: var(--surface);
+      }
+
+      tbody th {
+        background: var(--surface-alt);
+        border-bottom: 1px solid var(--border);
+      }
+
+      td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      td::before {
+        font-weight: 600;
+        color: var(--muted);
+        flex-shrink: 0;
+      }
+
+      td:nth-child(1)::before { content: var(--label-1) ": "; }
+      td:nth-child(2)::before { content: var(--label-2) ": "; }
+      td:nth-child(4)::before { content: var(--label-4) ": "; }
+      td:nth-child(5)::before { content: var(--label-5) ": "; }
+      td:nth-child(6)::before { content: var(--label-6) ": "; }
+      td:nth-child(7)::before { content: var(--label-7) ": "; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="hero">
+      <div>
+        <h1>নাট্য সংসদ নির্বাচন ২০২৬ — চূড়ান্ত ভোটার তালিকা</h1>
+        <p>নাটক ও নাট্যতত্ত্ব বিভাগ, জাহাঙ্গীরনগর বিশ্ববিদ্যালয় (৪৮–৫৫ ব্যাচ)</p>
+      </div>
+      <div class="hero-actions">
+        <a class="btn primary" href="https://docs.google.com/spreadsheets/d/1AENJ6IvjMLlTwNa4avLIS0lI4YhBG6-2LkMdAB8Yn0Q/edit" target="_blank" rel="noopener">গুগল শীট খুলুন</a>
+        <button type="button" class="btn" id="exportCsvBtn">CSV ডাউনলোড</button>
+      </div>
+    </header>
+
+    <section class="stats" aria-label="সারসংক্ষেপ">
+      <div class="stat-card">
+        <div class="stat-label">মোট ভোটার</div>
+        <div class="stat-value" id="statTotal">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">মোবাইল নম্বর আছে</div>
+        <div class="stat-value" id="statWithPhone">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">মোবাইল নম্বর নেই</div>
+        <div class="stat-value" id="statNoPhone">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">বর্তমানে প্রদর্শিত</div>
+        <div class="stat-value" id="statShown">0</div>
+      </div>
+    </section>
+
+    <section class="controls" aria-label="খুঁজুন ও ফিল্টার করুন">
+      <div class="search-row">
+        <input
+          type="search"
+          id="searchInput"
+          class="search-input"
+          placeholder="নাম, রোল, রেজিস্ট্রেশন নম্বর, মোবাইল বা নোট লিখে খুঁজুন..."
+          aria-label="ভোটার খুঁজুন"
+        />
+        <div class="filter-pills" role="group" aria-label="স্ট্যাটাস ফিল্টার">
+          <button type="button" class="pill" data-status="all" aria-pressed="true">সবাই</button>
+          <button type="button" class="pill" data-status="with-phone" aria-pressed="false">নম্বর আছে</button>
+          <button type="button" class="pill" data-status="no-phone" aria-pressed="false">নম্বর নেই</button>
+          <button type="button" class="pill" data-status="with-note" aria-pressed="false">নোট আছে</button>
+        </div>
+      </div>
+      <div class="batch-tabs" id="batchTabs" role="group" aria-label="ব্যাচ ফিল্টার"></div>
+    </section>
+
+    <section class="table-card">
+      <div tabindex="0" role="region" aria-labelledby="voter-table-caption" class="table-wrapper">
+        <table>
+          <caption id="voter-table-caption">নাট্য সংসদ নির্বাচন ২০২৬ চূড়ান্ত ভোটার তালিকা</caption>
+          <thead>
+            <tr>
+              <th scope="col">ব্যাচ</th>
+              <th scope="col">ক্রমিক</th>
+              <th scope="col">ছাত্র-ছাত্রীর নাম</th>
+              <th scope="col">রোল / শ্রেণি ক্রমিক</th>
+              <th scope="col">রেজিস্ট্রেশন নম্বর</th>
+              <th scope="col">মোবাইল নম্বর</th>
+              <th scope="col">অতিরিক্ত নোট</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+        <div class="empty-state" id="emptyState" hidden>কোনো তথ্য পাওয়া যায়নি।</div>
+      </div>
+    </section>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="data.js"></script>
+  <script>
+    const batches = window.VOTER_DATA || [];
+    const allRows = batches.flatMap(b =>
+      b.rows.map(r => ({
+        batch: b.batch,
+        session: b.session,
+        serial: r[0],
+        name: r[1],
+        roll: r[2],
+        reg: r[3],
+        phone: r[4],
+        note: r[5],
+      }))
+    );
+
+    let selectedBatch = "all";
+    let selectedStatus = "all";
+    let searchQuery = "";
+
+    const statTotal = document.getElementById("statTotal");
+    const statWithPhone = document.getElementById("statWithPhone");
+    const statNoPhone = document.getElementById("statNoPhone");
+    const statShown = document.getElementById("statShown");
+    const batchTabs = document.getElementById("batchTabs");
+    const tableBody = document.getElementById("tableBody");
+    const emptyState = document.getElementById("emptyState");
+    const searchInput = document.getElementById("searchInput");
+    const toast = document.getElementById("toast");
+
+    statTotal.textContent = allRows.length;
+    const withPhoneCount = allRows.filter(r => r.phone.length >= 10).length;
+    statWithPhone.textContent = withPhoneCount;
+    statNoPhone.textContent = allRows.length - withPhoneCount;
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add("show");
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(() => toast.classList.remove("show"), 1800);
+    }
+
+    function renderBatchTabs() {
+      const items = [{ key: "all", label: `সকল ব্যাচ (${allRows.length})` }]
+        .concat(batches.map(b => ({ key: b.batch, label: `${b.batch} (${b.rows.length})` })));
+
+      batchTabs.innerHTML = "";
+      for (const item of items) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "pill";
+        btn.textContent = item.label;
+        btn.setAttribute("aria-pressed", String(selectedBatch === item.key));
+        btn.addEventListener("click", () => {
+          selectedBatch = item.key;
+          renderBatchTabs();
+          renderTable();
+        });
+        batchTabs.appendChild(btn);
+      }
+    }
+
+    function getFilteredRows() {
+      const q = searchQuery.trim().toLowerCase();
+      return allRows.filter(r => {
+        if (selectedBatch !== "all" && r.batch !== selectedBatch) return false;
+        if (selectedStatus === "with-phone" && !r.phone) return false;
+        if (selectedStatus === "no-phone" && r.phone) return false;
+        if (selectedStatus === "with-note" && !r.note) return false;
+        if (!q) return true;
+        return (
+          r.name.toLowerCase().includes(q) ||
+          r.roll.toLowerCase().includes(q) ||
+          r.reg.toLowerCase().includes(q) ||
+          r.phone.toLowerCase().includes(q) ||
+          r.note.toLowerCase().includes(q) ||
+          r.batch.toLowerCase().includes(q)
+        );
+      });
+    }
+
+    function createCell(text) {
+      const td = document.createElement("td");
+      td.textContent = text;
+      return td;
+    }
+
+    function renderTable() {
+      const rows = getFilteredRows();
+      statShown.textContent = rows.length;
+      tableBody.innerHTML = "";
+      emptyState.hidden = rows.length > 0;
+
+      const frag = document.createDocumentFragment();
+      for (const r of rows) {
+        const tr = document.createElement("tr");
+
+        const batchTd = document.createElement("td");
+        const batchBadge = document.createElement("span");
+        batchBadge.className = "badge";
+        batchBadge.textContent = r.batch;
+        batchBadge.title = r.session;
+        batchTd.appendChild(batchBadge);
+        tr.appendChild(batchTd);
+
+        tr.appendChild(createCell(r.serial));
+
+        const nameTh = document.createElement("th");
+        nameTh.scope = "row";
+        nameTh.textContent = r.name;
+        tr.appendChild(nameTh);
+
+        tr.appendChild(createCell(r.roll));
+        tr.appendChild(createCell(r.reg));
+
+        const phoneTd = document.createElement("td");
+        if (r.phone) {
+          const wrap = document.createElement("div");
+          wrap.className = "phone-cell";
+
+          const numSpan = document.createElement("span");
+          numSpan.className = "phone-num";
+          numSpan.textContent = r.phone;
+          wrap.appendChild(numSpan);
+
+          const copyBtn = document.createElement("button");
+          copyBtn.type = "button";
+          copyBtn.className = "mini-btn";
+          copyBtn.textContent = "কপি";
+          copyBtn.addEventListener("click", async () => {
+            try {
+              await navigator.clipboard.writeText(r.phone);
+              showToast(`কপি হয়েছে: ${r.phone}`);
+            } catch {
+              showToast(r.phone);
+            }
+          });
+          wrap.appendChild(copyBtn);
+
+          if (r.phone.length >= 10) {
+            const callLink = document.createElement("a");
+            callLink.className = "mini-btn";
+            callLink.href = `tel:${r.phone}`;
+            callLink.textContent = "কল";
+            wrap.appendChild(callLink);
+
+            const waLink = document.createElement("a");
+            waLink.className = "mini-btn wa";
+            waLink.href = `https://wa.me/88${r.phone}`;
+            waLink.target = "_blank";
+            waLink.rel = "noopener";
+            waLink.textContent = "WA";
+            wrap.appendChild(waLink);
+          }
+
+          phoneTd.appendChild(wrap);
+        } else {
+          phoneTd.textContent = "—";
+        }
+        tr.appendChild(phoneTd);
+
+        const noteTd = document.createElement("td");
+        if (r.note) {
+          const span = document.createElement("span");
+          span.className = "note-tag";
+          span.textContent = r.note;
+          noteTd.appendChild(span);
+        } else {
+          noteTd.textContent = "—";
+        }
+        tr.appendChild(noteTd);
+
+        frag.appendChild(tr);
+      }
+
+      tableBody.appendChild(frag);
+    }
+
+    searchInput.addEventListener("input", e => {
+      searchQuery = e.target.value;
+      renderTable();
+    });
+
+    document.querySelectorAll("[data-status]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        selectedStatus = btn.dataset.status;
+        document.querySelectorAll("[data-status]").forEach(b => {
+          b.setAttribute("aria-pressed", String(b === btn));
+        });
+        renderTable();
+      });
+    });
+
+    document.getElementById("exportCsvBtn").addEventListener("click", () => {
+      const rows = getFilteredRows();
+      const header = ["ব্যাচ", "শিক্ষাবর্ষ", "ক্রমিক", "নাম", "রোল/শ্রেণি ক্রমিক", "রেজিস্ট্রেশন নম্বর", "মোবাইল নম্বর", "নোট"];
+      const esc = v => `"${String(v ?? "").replaceAll('"', '""')}"`;
+      const csv = [header, ...rows.map(r => [r.batch, r.session, r.serial, r.name, r.roll, r.reg, r.phone, r.note])]
+        .map(line => line.map(esc).join(","))
+        .join("\r\n");
+
+      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "voter-list-2026.csv";
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast("CSV ডাউনলোড শুরু হয়েছে");
+    });
+
+    renderBatchTabs();
+    renderTable();
+  </script>
+</body>
+</html>
