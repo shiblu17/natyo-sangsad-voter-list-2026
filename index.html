@@ -368,6 +368,147 @@
 
     .toast.show { opacity: 1; }
 
+    .select-col {
+      width: 42px;
+      text-align: center;
+    }
+
+    .row-check, #selectAll {
+      width: 17px;
+      height: 17px;
+      cursor: pointer;
+    }
+
+    tr.is-selected td,
+    tr.is-selected th {
+      background: color-mix(in srgb, var(--brand) 12%, var(--surface)) !important;
+    }
+
+    .selection-bar {
+      position: sticky;
+      bottom: 0.75rem;
+      z-index: 15;
+      margin-top: 1rem;
+      background: var(--surface);
+      border: 2px solid var(--brand);
+      border-radius: 14px;
+      padding: 0.85rem 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+    }
+
+    .selection-bar[hidden] {
+      display: none;
+    }
+
+    .selection-info {
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .selection-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.6rem;
+      flex: 1 1 360px;
+      justify-content: flex-end;
+    }
+
+    .handler-input {
+      flex: 1 1 220px;
+      max-width: 320px;
+      padding: 0.55rem 0.85rem;
+      border-radius: 9px;
+      border: 1px solid var(--border);
+      background: var(--surface-alt);
+      color: var(--text);
+      font: inherit;
+      font-size: 0.92rem;
+    }
+
+    #printSheet {
+      display: none;
+    }
+
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 12mm;
+      }
+
+      :root {
+        color-scheme: light;
+      }
+
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+      }
+
+      .container, .toast {
+        display: none !important;
+      }
+
+      #printSheet {
+        display: block !important;
+        color: #000000;
+        font-size: 11pt;
+      }
+
+      .print-header {
+        text-align: center;
+        border-bottom: 2px solid #000;
+        padding-bottom: 8px;
+        margin-bottom: 10px;
+      }
+
+      .print-header h2 {
+        margin: 0 0 2px;
+        font-size: 15pt;
+      }
+
+      .print-header p {
+        margin: 0;
+        font-size: 10.5pt;
+      }
+
+      .print-meta {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 8px;
+        background: #f3f4f6;
+        border: 1px solid #9ca3af;
+        padding: 8px 12px;
+        margin-bottom: 12px;
+        font-size: 10.5pt;
+      }
+
+      .print-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 9.5pt;
+      }
+
+      .print-table th,
+      .print-table td {
+        border: 1px solid #374151;
+        padding: 5px 7px;
+        text-align: left;
+      }
+
+      .print-table thead th {
+        background: #e5e7eb !important;
+        color: #000000 !important;
+        font-weight: 700;
+      }
+    }
+
     @container (width < 680px) {
       .table-wrapper {
         max-block-size: none;
@@ -408,12 +549,13 @@
         flex-shrink: 0;
       }
 
-      td:nth-child(1)::before { content: var(--label-1) ": "; }
-      td:nth-child(2)::before { content: var(--label-2) ": "; }
-      td:nth-child(4)::before { content: var(--label-4) ": "; }
-      td:nth-child(5)::before { content: var(--label-5) ": "; }
-      td:nth-child(6)::before { content: var(--label-6) ": "; }
-      td:nth-child(7)::before { content: var(--label-7) ": "; }
+      td.select-col::before { content: "নির্বাচন: "; }
+      td:nth-child(2)::before { content: var(--label-1) ": "; }
+      td:nth-child(3)::before { content: var(--label-2) ": "; }
+      td:nth-child(5)::before { content: var(--label-4) ": "; }
+      td:nth-child(6)::before { content: var(--label-5) ": "; }
+      td:nth-child(7)::before { content: var(--label-6) ": "; }
+      td:nth-child(8)::before { content: var(--label-7) ": "; }
     }
   </style>
 </head>
@@ -474,6 +616,9 @@
           <caption id="voter-table-caption">নাট্য সংসদ নির্বাচন ২০২৬ চূড়ান্ত ভোটার তালিকা</caption>
           <thead>
             <tr>
+              <th scope="col" class="select-col">
+                <input type="checkbox" id="selectAll" aria-label="বর্তমান তালিকার সব সিলেক্ট করুন" title="সব সিলেক্ট / আনসিলেক্ট" />
+              </th>
               <th scope="col">ব্যাচ</th>
               <th scope="col">ক্রমিক</th>
               <th scope="col">ছাত্র-ছাত্রীর নাম</th>
@@ -488,7 +633,24 @@
         <div class="empty-state" id="emptyState" hidden>কোনো তথ্য পাওয়া যায়নি।</div>
       </div>
     </section>
+
+    <div class="selection-bar" id="selectionBar" hidden role="region" aria-label="নির্বাচিত ভোটার প্রিন্ট অপশন">
+      <div class="selection-info" id="selectionCount">নির্বাচিত: ০ জন</div>
+      <div class="selection-actions">
+        <input
+          type="text"
+          id="handlerNameInput"
+          class="handler-input"
+          placeholder="যিনি ডিল করবেন তাঁর নাম লিখুন..."
+          aria-label="দায়িত্বপ্রাপ্ত ব্যক্তির নাম"
+        />
+        <button type="button" class="btn" id="clearSelectionBtn">মুছুন</button>
+        <button type="button" class="btn primary" id="printPdfBtn">প্রিন্ট / পিডিএফ করুন</button>
+      </div>
+    </div>
   </div>
+
+  <section id="printSheet" aria-hidden="true"></section>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -497,6 +659,7 @@
     const batches = window.VOTER_DATA || [];
     const allRows = batches.flatMap(b =>
       b.rows.map(r => ({
+        key: `${b.batch}|${r[0]}|${r[2]}`,
         batch: b.batch,
         session: b.session,
         serial: r[0],
@@ -508,6 +671,7 @@
       }))
     );
 
+    const selectedKeys = new Set();
     let selectedBatch = "all";
     let selectedStatus = "all";
     let searchQuery = "";
@@ -520,6 +684,13 @@
     const tableBody = document.getElementById("tableBody");
     const emptyState = document.getElementById("emptyState");
     const searchInput = document.getElementById("searchInput");
+    const selectAll = document.getElementById("selectAll");
+    const selectionBar = document.getElementById("selectionBar");
+    const selectionCount = document.getElementById("selectionCount");
+    const handlerNameInput = document.getElementById("handlerNameInput");
+    const clearSelectionBtn = document.getElementById("clearSelectionBtn");
+    const printPdfBtn = document.getElementById("printPdfBtn");
+    const printSheet = document.getElementById("printSheet");
     const toast = document.getElementById("toast");
 
     statTotal.textContent = allRows.length;
@@ -579,6 +750,21 @@
       return td;
     }
 
+    function updateSelectionBar(visibleRows) {
+      const count = selectedKeys.size;
+      selectionBar.hidden = count === 0;
+      selectionCount.textContent = `নির্বাচিত: ${count} জন`;
+
+      if (visibleRows && visibleRows.length > 0) {
+        const selectedVisible = visibleRows.filter(r => selectedKeys.has(r.key)).length;
+        selectAll.checked = selectedVisible === visibleRows.length;
+        selectAll.indeterminate = selectedVisible > 0 && selectedVisible < visibleRows.length;
+      } else {
+        selectAll.checked = false;
+        selectAll.indeterminate = false;
+      }
+    }
+
     function renderTable() {
       const rows = getFilteredRows();
       statShown.textContent = rows.length;
@@ -588,6 +774,28 @@
       const frag = document.createDocumentFragment();
       for (const r of rows) {
         const tr = document.createElement("tr");
+        const isChecked = selectedKeys.has(r.key);
+        if (isChecked) tr.classList.add("is-selected");
+
+        const checkTd = document.createElement("td");
+        checkTd.className = "select-col";
+        const cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.className = "row-check";
+        cb.checked = isChecked;
+        cb.setAttribute("aria-label", `${r.name} নির্বাচন করুন`);
+        cb.addEventListener("change", () => {
+          if (cb.checked) {
+            selectedKeys.add(r.key);
+            tr.classList.add("is-selected");
+          } else {
+            selectedKeys.delete(r.key);
+            tr.classList.remove("is-selected");
+          }
+          updateSelectionBar(rows);
+        });
+        checkTd.appendChild(cb);
+        tr.appendChild(checkTd);
 
         const batchTd = document.createElement("td");
         const batchBadge = document.createElement("span");
@@ -668,7 +876,99 @@
       }
 
       tableBody.appendChild(frag);
+      updateSelectionBar(rows);
     }
+
+    selectAll.addEventListener("change", () => {
+      const rows = getFilteredRows();
+      for (const r of rows) {
+        if (selectAll.checked) {
+          selectedKeys.add(r.key);
+        } else {
+          selectedKeys.delete(r.key);
+        }
+      }
+      renderTable();
+    });
+
+    clearSelectionBtn.addEventListener("click", () => {
+      selectedKeys.clear();
+      handlerNameInput.value = "";
+      renderTable();
+    });
+
+    printPdfBtn.addEventListener("click", () => {
+      const selectedRows = allRows.filter(r => selectedKeys.has(r.key));
+      if (selectedRows.length === 0) {
+        showToast("প্রথমে অন্তত একজন ভোটার সিলেক্ট করুন");
+        return;
+      }
+
+      const handlerName = handlerNameInput.value.trim() || "নির্ধারিত নয়";
+      const today = new Date().toLocaleDateString("bn-BD", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+
+      printSheet.innerHTML = "";
+
+      const header = document.createElement("div");
+      header.className = "print-header";
+      const h2 = document.createElement("h2");
+      h2.textContent = "নাট্য সংসদ নির্বাচন ২০২৬ — ভোটার তালিকা (দায়িত্ব বণ্টন)";
+      const p = document.createElement("p");
+      p.textContent = "নাটক ও নাট্যতত্ত্ব বিভাগ, জাহাঙ্গীরনগর বিশ্ববিদ্যালয়";
+      header.append(h2, p);
+      printSheet.appendChild(header);
+
+      const meta = document.createElement("div");
+      meta.className = "print-meta";
+      const m1 = document.createElement("div");
+      m1.textContent = `দায়িত্বপ্রাপ্ত (যিনি ডিল করবেন): ${handlerName}`;
+      m1.style.fontWeight = "700";
+      const m2 = document.createElement("div");
+      m2.textContent = `মোট ভোটার: ${selectedRows.length} জন | তারিখ: ${today}`;
+      meta.append(m1, m2);
+      printSheet.appendChild(meta);
+
+      const table = document.createElement("table");
+      table.className = "print-table";
+
+      const thead = document.createElement("thead");
+      const headTr = document.createElement("tr");
+      for (const col of ["ক্রমিক", "ব্যাচ", "ছাত্র-ছাত্রীর নাম", "রোল", "রেজিস্ট্রেশন নম্বর", "মোবাইল নম্বর", "নোট"]) {
+        const th = document.createElement("th");
+        th.textContent = col;
+        headTr.appendChild(th);
+      }
+      thead.appendChild(headTr);
+      table.appendChild(thead);
+
+      const tbody = document.createElement("tbody");
+      selectedRows.forEach((r, idx) => {
+        const tr = document.createElement("tr");
+        const cells = [
+          String(idx + 1),
+          r.batch,
+          r.name,
+          r.roll,
+          r.reg || "—",
+          r.phone || "—",
+          r.note || "—",
+        ];
+        for (const val of cells) {
+          const td = document.createElement("td");
+          td.textContent = val;
+          tr.appendChild(td);
+        }
+        tbody.appendChild(tr);
+      });
+      table.appendChild(tbody);
+      printSheet.appendChild(table);
+
+      window.print();
+    });
 
     searchInput.addEventListener("input", e => {
       searchQuery = e.target.value;
